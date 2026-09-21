@@ -1,0 +1,39 @@
+# 构建产物
+build/dist/
+build/work/
+build/*.log
+
+# 编译产物（tools/xgfx_app 下的成品 EXE 除外）
+*.o
+*.obj
+build/**/*.exe
+sim/**/*.exe
+*.bin
+*.out
+*.map
+*.elf
+*.hex
+*.lss
+
+# 模拟器产物
+sim/build/
+sim/_*.bin
+sim/screenshot.bmp
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# 临时文件
+*.tmp
+*.bak
+*.swp
+*~
+
+# IDE
+.vscode/
+.vs/
+*.suo
+*.user

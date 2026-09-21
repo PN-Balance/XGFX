@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_1" data-name="图层_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 360 175">
+  <!-- Generator: Adobe Illustrator 30.0.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 123)  -->
+  <defs>
+    <style>
+      .st0 {
+        font-size: 26.14px;
+        letter-spacing: .43em;
+      }
+
+      .st0, .st1, .st2, .st3, .st4, .st5 {
+        isolation: isolate;
+      }
+
+      .st0, .st5 {
+        fill: #00d4ff;
+        font-family: FranklinGothic-Medium, 'Franklin Gothic Medium';
+        font-weight: 500;
+        opacity: .85;
+      }
+
+      .st6 {
+        fill: url(#_未命名的渐变_8);
+      }
+
+      .st7 {
+        fill: url(#_未命名的渐变_5);
+      }
+
+      .st8 {
+        filter: url(#glow7);
+      }
+
+      .st1 {
+        fill: #48f;
+      }
+
+      .st1, .st3, .st4 {
+        font-family: 'AlibabaPuHuiTi_3_85_Bold', 'Alibaba PuHuiTi 3.0';
+        font-size: 88px;
+        letter-spacing: .04em;
+      }
+
+      .st9 {
+        filter: url(#glow1);
+      }
+
+      .st10 {
+        filter: url(#glow8);
+      }
+
+      .st11 {
+        filter: url(#glow5);
+      }
+
+      .st12 {
+        fill: url(#_未命名的渐变_9);
+      }
+
+      .st13 {
+        filter: url(#glow2);
+      }
+
+      .st14 {
+        fill: url(#_未命名的渐变_6);
+      }
+
+      .st3 {
+        fill: #4f4;
+      }
+
+      .st15 {
+        fill: url(#_未命名的渐变_7);
+      }
+
+      .st16 {
+        fill: url(#_未命名的渐变_3);
+      }
+
+      .st17 {
+        fill: url(#_未命名的渐变);
+      }
+
+      .st18 {
+        filter: url(#glow);
+      }
+
+      .st19 {
+        filter: url(#glow3);
+      }
+
+      .st20 {
+        fill: gray;
+        fill-opacity: .5;
+      }
+
+      .st4 {
+        fill: #f44;
+      }
+
+      .st21 {
+        filter: url(#glow6);
+      }
+
+      .st22 {
+        fill: url(#_未命名的渐变_4);
+      }
+
+      .st5 {
+        font-size: 27.22px;
+        letter-spacing: .24em;
+      }
+
+      .st23 {
+        filter: url(#glow4);
+      }
+
+      .st24 {
+        fill: url(#_未命名的渐变_2);
+      }
+    </style>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur result="blur" stdDeviation="2"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="_未命名的渐变" data-name="未命名的渐变" x1="-303.85" y1="364.43" x2="-302.85" y2="363.43" gradientTransform="translate(7920 9491.16) scale(26 -26)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ff5050"/>
+      <stop offset="1" stop-color="#f22"/>
+    </linearGradient>
+    <filter id="glow1" data-name="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur result="blur" stdDeviation="2"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="_未命名的渐变_2" data-name="未命名的渐变 2" x1="-302.85" y1="364.43" x2="-303.85" y2="363.43" gradientTransform="translate(8036 9491.16) scale(26 -26)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#50aaff"/>
+      <stop offset="1" stop-color="#26f"/>
+    </linearGradient>
+    <filter id="glow2" data-name="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur result="blur" stdDeviation="2"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="_未命名的渐变_3" data-name="未命名的渐变 3" x1="-303.85" y1="364.43" x2="-302.85" y2="363.43" gradientTransform="translate(7949 9520.16) scale(26 -26)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fd4"/>
+      <stop offset="1" stop-color="#fc2"/>
+    </linearGradient>
+    <filter id="glow3" data-name="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur result="blur" stdDeviation="2"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="_未命名的渐变_4" data-name="未命名的渐变 4" x1="-302.85" y1="364.43" x2="-303.85" y2="363.43" gradientTransform="translate(8007 9520.16) scale(26 -26)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d5f"/>
+      <stop offset="1" stop-color="#a2e"/>
+    </linearGradient>
+    <filter id="glow4" data-name="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur result="blur" stdDeviation="2"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="_未命名的渐变_5" data-name="未命名的渐变 5" x1="-303.85" y1="364.43" x2="-302.85" y2="363.43" gradientTransform="translate(7978 9549.16) scale(26 -26)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#000"/>
+      <stop offset="1" stop-color="#1a1a1a"/>
+    </linearGradient>
+    <filter id="glow5" data-name="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur result="blur" stdDeviation="2"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="_未命名的渐变_6" data-name="未命名的渐变 6" x1="-303.85" y1="364.43" x2="-302.85" y2="363.43" gradientTransform="translate(7949 9578.16) scale(26 -26)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f94"/>
+      <stop offset="1" stop-color="#f72"/>
+    </linearGradient>
+    <filter id="glow6" data-name="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur result="blur" stdDeviation="2"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="_未命名的渐变_7" data-name="未命名的渐变 7" x1="-302.85" y1="364.43" x2="-303.85" y2="363.43" gradientTransform="translate(8007 9578.16) scale(26 -26)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5fd"/>
+      <stop offset="1" stop-color="#2da"/>
+    </linearGradient>
+    <filter id="glow7" data-name="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur result="blur" stdDeviation="2"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="_未命名的渐变_8" data-name="未命名的渐变 8" x1="-303.85" y1="364.43" x2="-302.85" y2="363.43" gradientTransform="translate(7920 9607.16) scale(26 -26)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5f5"/>
+      <stop offset="1" stop-color="#2d2"/>
+    </linearGradient>
+    <filter id="glow8" data-name="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur result="blur" stdDeviation="2"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="_未命名的渐变_9" data-name="未命名的渐变 9" x1="-302.85" y1="364.43" x2="-303.85" y2="363.43" gradientTransform="translate(8036 9607.16) scale(26 -26)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f6b"/>
+      <stop offset="1" stop-color="#e29"/>
+    </linearGradient>
+  </defs>
+  <g class="st18">
+    <rect class="st17" x="20" y="16" width="26" height="26" rx="4" ry="4"/>
+  </g>
+  <rect class="st20" x="49" y="16" width="26" height="26" rx="4" ry="4"/>
+  <rect class="st20" x="78" y="16" width="26" height="26" rx="4" ry="4"/>
+  <rect class="st20" x="107" y="16" width="26" height="26" rx="4" ry="4"/>
+  <g class="st9">
+    <rect class="st24" x="136" y="16" width="26" height="26" rx="4" ry="4"/>
+  </g>
+  <rect class="st20" x="20" y="45" width="26" height="26" rx="4" ry="4"/>
+  <g class="st13">
+    <rect class="st16" x="49" y="45" width="26" height="26" rx="4" ry="4"/>
+  </g>
+  <rect class="st20" x="78" y="45" width="26" height="26" rx="4" ry="4"/>
+  <g class="st19">
+    <rect class="st22" x="107" y="45" width="26" height="26" rx="4" ry="4"/>
+  </g>
+  <rect class="st20" x="136" y="45" width="26" height="26" rx="4" ry="4"/>
+  <rect class="st20" x="20" y="74" width="26" height="26" rx="4" ry="4"/>
+  <rect class="st20" x="49" y="74" width="26" height="26" rx="4" ry="4"/>
+  <g class="st23">
+    <rect class="st7" x="78" y="74" width="26" height="26" rx="4" ry="4"/>
+  </g>
+  <rect class="st20" x="107" y="74" width="26" height="26" rx="4" ry="4"/>
+  <rect class="st20" x="136" y="74" width="26" height="26" rx="4" ry="4"/>
+  <rect class="st20" x="20" y="103" width="26" height="26" rx="4" ry="4"/>
+  <g class="st11">
+    <rect class="st14" x="49" y="103" width="26" height="26" rx="4" ry="4"/>
+  </g>
+  <rect class="st20" x="78" y="103" width="26" height="26" rx="4" ry="4"/>
+  <g class="st21">
+    <rect class="st15" x="107" y="103" width="26" height="26" rx="4" ry="4"/>
+  </g>
+  <rect class="st20" x="136" y="103" width="26" height="26" rx="4" ry="4"/>
+  <g class="st8">
+    <rect class="st6" x="20" y="132" width="26" height="26" rx="4" ry="4"/>
+  </g>
+  <rect class="st20" x="49" y="132" width="26" height="26" rx="4" ry="4"/>
+  <rect class="st20" x="78" y="132" width="26" height="26" rx="4" ry="4"/>
+  <rect class="st20" x="107" y="132" width="26" height="26" rx="4" ry="4"/>
+  <g class="st10">
+    <rect class="st12" x="136" y="132" width="26" height="26" rx="4" ry="4"/>
+  </g>
+  <g class="st2">
+    <text class="st4" transform="translate(177.65 76.3)"><tspan x="0" y="0">G</tspan></text>
+    <text class="st3" transform="translate(234.46 76.3)"><tspan x="0" y="0">F</tspan></text>
+    <text class="st1" transform="translate(291.27 76.3)"><tspan x="0" y="0">X</tspan></text>
+  </g>
+  <text class="st5" transform="translate(180 122.69)"><tspan x="0" y="0">GRAPHICS</tspan></text>
+  <text class="st0" transform="translate(181.05 156.91)"><tspan x="0" y="0">LIBRARY</tspan></text>
+</svg>

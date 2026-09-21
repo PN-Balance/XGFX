@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XGFX Logo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #0A0E1A;
+    font-family: 'Courier New', 'Consolas', monospace;
+  }
+
+  /* ===== 长方形容器 ===== */
+  .logo-box {
+    display: flex;
+    align-items: stretch;
+    width: 520px;
+    height: 200px;
+    padding: 20px 28px;
+    gap: 32px;
+  }
+
+  /* ===== 左侧：像素 X（垂直居中） ===== */
+  .pixel-x {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 3px;
+    width: 140px;
+    height: 140px;
+    align-self: center;
+    flex-shrink: 0;
+  }
+
+  .px {
+    border-radius: 5px;
+  }
+
+  /* 行0 — 左上角红，右上角蓝 */
+  .px:nth-child(1)  { background: linear-gradient(135deg, #FF4444, #CC2222); box-shadow: 0 0 10px rgba(255,68,68,0.4); }
+  .px:nth-child(2)  { background: #1A2438; }
+  .px:nth-child(3)  { background: #1A2438; }
+  .px:nth-child(4)  { background: #1A2438; }
+  .px:nth-child(5)  { background: linear-gradient(225deg, #4488FF, #2266CC); box-shadow: 0 0 10px rgba(68,136,255,0.4); }
+
+  /* 行1 — 左黄，右紫 */
+  .px:nth-child(6)  { background: #1A2438; }
+  .px:nth-child(7)  { background: linear-gradient(135deg, #FFCC44, #DDAA22); box-shadow: 0 0 8px rgba(255,204,68,0.3); }
+  .px:nth-child(8)  { background: #1A2438; }
+  .px:nth-child(9)  { background: linear-gradient(225deg, #CC44FF, #9922DD); box-shadow: 0 0 8px rgba(204,68,255,0.3); }
+  .px:nth-child(10) { background: #1A2438; }
+
+  /* 行2 — 中心：白色，带点阵网格 */
+  .px:nth-child(11) { background: #1A2438; }
+  .px:nth-child(12) { background: #1A2438; }
+  .px:nth-child(13) {
+    background: linear-gradient(135deg, #E8ECF4, #B0B8C8);
+    box-shadow: 0 0 14px rgba(232,236,244,0.4);
+  }
+  .px:nth-child(14) { background: #1A2438; }
+  .px:nth-child(15) { background: #1A2438; }
+
+  /* 行3 — 左橙，右青 */
+  .px:nth-child(16) { background: #1A2438; }
+  .px:nth-child(17) { background: linear-gradient(135deg, #FF8844, #DD6622); box-shadow: 0 0 8px rgba(255,136,68,0.3); }
+  .px:nth-child(18) { background: #1A2438; }
+  .px:nth-child(19) { background: linear-gradient(225deg, #44FFCC, #22CCAA); box-shadow: 0 0 8px rgba(68,255,204,0.3); }
+  .px:nth-child(20) { background: #1A2438; }
+
+  /* 行4 — 左下角绿，右下角粉 */
+  .px:nth-child(21) { background: linear-gradient(135deg, #44FF44, #22CC22); box-shadow: 0 0 10px rgba(68,255,68,0.4); }
+  .px:nth-child(22) { background: #1A2438; }
+  .px:nth-child(23) { background: #1A2438; }
+  .px:nth-child(24) { background: #1A2438; }
+  .px:nth-child(25) { background: linear-gradient(225deg, #FF44AA, #CC2277); box-shadow: 0 0 10px rgba(255,68,170,0.4); }
+
+  /* ===== 右侧：上 GFX / 下 tagline ===== */
+  .text-area {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+    padding: 8px 0;
+  }
+
+  /* 右上角：GFX — 三字母对应 RGB */
+  .gfx-text {
+    font-size: 92px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    line-height: 1;
+    text-align: left;
+  }
+  .gfx-text .letter-r { color: #FF4444; text-shadow: 0 0 16px rgba(255,68,68,0.3); }
+  .gfx-text .letter-g { color: #44FF44; text-shadow: 0 0 16px rgba(68,255,68,0.3); }
+  .gfx-text .letter-b { color: #4488FF; text-shadow: 0 0 16px rgba(68,136,255,0.3); }
+
+  /* 右下角：小字 — 宽度对齐 GFX */
+  .tagline {
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 15.5px;
+    color: #00D4FF;
+    text-transform: uppercase;
+    opacity: 0.8;
+    text-align: left;
+    /* 补偿末尾字间距导致的左对齐偏移 */
+    padding-right: 0;
+    margin-left: 4px;
+  }
+</style>
+</head>
+<body>
+  <div class="logo-box">
+    <div class="pixel-x">
+      <div class="px"></div><div class="px"></div><div class="px"></div><div class="px"></div><div class="px"></div>
+      <div class="px"></div><div class="px"></div><div class="px"></div><div class="px"></div><div class="px"></div>
+      <div class="px"></div><div class="px"></div><div class="px"></div><div class="px"></div><div class="px"></div>
+      <div class="px"></div><div class="px"></div><div class="px"></div><div class="px"></div><div class="px"></div>
+      <div class="px"></div><div class="px"></div><div class="px"></div><div class="px"></div><div class="px"></div>
+    </div>
+    <div class="text-area">
+      <div class="gfx-text"><span class="letter-r">G</span><span class="letter-g">F</span><span class="letter-b">X</span></div>
+      <div class="tagline">Graphics<br>Library</div>
+    </div>
+  </div>
+</body>
+</html>
