@@ -13,6 +13,8 @@ sim/**/*.exe
 *.map
 *.elf
 *.hex
+!example/hardware_usage/DEPLOY/*.bin
+!example/hardware_usage/DEPLOY/*.hex
 *.lss
 
 # 模拟器产物

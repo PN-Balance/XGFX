@@ -1,9 +1,9 @@
-﻿; XGFX installer for Inno Setup 6
+; XGFX installer for Inno Setup 6
 ; Build with:  ISCC.exe build\xgfx.iss
 ; Output:      build\installer\XGFX-Setup.exe
 ; Requires:    Inno Setup 6 (https://jrsoftware.org/isdl.php)
 
-#define XGFXVersion "1.0.0"
+#define XGFXVersion "1.1.0"
 #define XGFXPublisher "XGFX Project"
 
 [Setup]

@@ -282,6 +282,7 @@ header{display:flex;align-items:center;gap:10px;min-height:34px}
 .preview-card{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;background:rgba(255,255,255,0.02);backdrop-filter:blur(12px);transition:border-color .2s}
 .preview-card:hover{border-color:var(--border-2)}
 .preview-caption{display:flex;justify-content:space-between;padding:9px 13px;font-size:11px;background:rgba(255,255,255,0.03);color:var(--text-dim);border-bottom:1px solid var(--border)}
+.preview-caption .size-detail{text-align:right;line-height:1.45;max-width:78%}
 .viewport{flex:1;position:relative;overflow:hidden;cursor:grab;min-height:0;background-color:#161618;background-image:linear-gradient(45deg,rgba(255,255,255,0.025) 25%,transparent 25%),linear-gradient(-45deg,rgba(255,255,255,0.025) 25%,transparent 25%),linear-gradient(45deg,transparent 75%,rgba(255,255,255,0.025) 75%),linear-gradient(-45deg,transparent 75%,rgba(255,255,255,0.025) 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0;-webkit-app-region:no-drag;app-region:no-drag}
 .viewport:active{cursor:grabbing}
 .viewport img{position:absolute;left:50%;top:50%;max-width:none;image-rendering:pixelated;transform-origin:center;pointer-events:none;user-select:none;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
@@ -380,7 +381,7 @@ progress::-webkit-progress-value{background:linear-gradient(100deg,#0066ff 0%,#2
    <details class="panel"><summary>项目设置<span class="sub">输出路径 · 文件名 · Flash</span></summary><div class="panel-body project-grid grid"><label>输出文件名<input id="outName"></label><label>C/H 保存目录<div class="path"><input id="codeDir"><button id="chooseOutput" title="选择目录">…</button></div></label><label>字节序<select id="byteOrder"><option>little</option><option>big</option></select></label><label>Flash 起点<input id="flashBase"></label><label>对齐<input id="alignment"></label></div></details>
    <details class="panel"><summary>全局图片默认配置<span class="sub" id="defaultSummary"></span></summary><div class="panel-body"><div class="section-head"><label class="fixed"><input type="checkbox" id="fixedColor">固定色彩模型 · 所有图片统一使用</label><span class="sub">调色板按 BPP 自动量化</span></div><div class="grid" id="globalFields"></div></div></details>
    <section class="editor"><div class="section-head"><span class="section-title" id="selectionTitle">当前图片</span><span class="sub" id="currentSize">大小 —</span><div class="switch" id="configMode"><button id="inherit">使用全局</button><button id="custom">独立配置</button></div><button id="apply" class="small outline">应用到图片</button></div><div class="name"><span>资源名</span><input id="assetName" placeholder="从左侧选择一张图片"></div><div class="grid" id="assetFields"></div></section>
-   <section class="previews"><div class="preview-head"><span class="section-title">效果对比 <span class="sub">· 滚轮缩放，拖动平移</span></span><div class="tools"><button id="fit" class="small">适应窗口</button><button id="minus" class="small">−</button><span class="scale" id="scale">100%</span><button id="plus" class="small">＋</button></div></div><div class="compare"><div class="preview-card"><div class="preview-caption"><span>原始图片</span><span class="sub" id="dimensions"></span></div><div class="viewport"><img id="original" class="hidden"><div class="placeholder">从资源管理器选择图片</div></div></div><div class="preview-card"><div class="preview-caption"><span>转换效果</span><span class="palette" id="palette"></span></div><div class="viewport"><img id="converted" class="hidden"><div class="placeholder" id="conversionHint">按当前参数实时预览</div></div></div></div></section>
+   <section class="previews"><div class="preview-head"><span class="section-title">效果对比 <span class="sub">· 滚轮缩放，拖动平移</span></span><div class="tools"><button id="fit" class="small">适应窗口</button><button id="minus" class="small">−</button><span class="scale" id="scale">100%</span><button id="plus" class="small">＋</button></div></div><div class="compare"><div class="preview-card"><div class="preview-caption"><span>原始图片</span><span class="sub size-detail" id="dimensions"></span></div><div class="viewport"><img id="original" class="hidden"><div class="placeholder">从资源管理器选择图片</div></div></div><div class="preview-card"><div class="preview-caption"><span>转换效果</span><span class="palette" id="palette"></span></div><div class="viewport"><img id="converted" class="hidden"><div class="placeholder" id="conversionHint">按当前参数实时预览</div></div></div></div></section>
   </div>
   <div id="welcomeView" class="welcome-inner">
    <div class="welcome-card">
@@ -403,7 +404,7 @@ progress::-webkit-progress-value{background:linear-gradient(100deg,#0066ff 0%,#2
 </dialog>
 <script>
 const $=id=>document.getElementById(id), clone=x=>structuredClone(x);
-const fields=[['type','图片类型',['MIRROR','BITMAP','BITMAP_WITH_PALETTE']],['storage','存储',['FLASH','MCU']],['color_format','色彩模型',['RGB332','RGB565','RGB888']],['bpp','BPP',[0,1,2,3,4,5]],['alpha_bpp','Alpha BPP',[0,1,2,3,4,5]]];
+const fields=[['type','图片类型',['MIRROR','BITMAP','BITMAP_WITH_PALETTE']],['storage','存储',['FLASH','MCU']],['color_format','色彩模型',['RGB332','RGB565','RGB888']],['bpp','BPP',[0,1,2,3,4,5]],['alpha_bpp','Alpha BPP',[0,1,2,3,4,5]],['quantization','量化算法',['DOMINANT','MEDIAN_CUT','MAX_COVERAGE','FAST_OCTREE']],['background_color','无 Alpha 背景色',null]];
 let state={},data=null,savedData=null,config='xgfx_assets.json',selected=-1,selectedItems=new Set(),selectionAnchor=-1,batchTouched=false,draft=null,mode='global',dirty=false,pending=false,request=0,zoom=null,pan={x:0,y:0},imgSize={w:1,h:1},scale=1,previewTimer,busy=false;
 async function api(method,...args){return await window.pywebview.api[method](...args)}
 function confirmDialog(title,msg){return new Promise(res=>{
@@ -518,12 +519,15 @@ async function finishClose(shouldSave){
 $('exitSave').onclick=()=>finishClose(true);
 $('exitDiscard').onclick=()=>finishClose(false);
 
-for(const group of ['global','asset']){for(const [key,label,values] of fields){const wrap=document.createElement('label');wrap.textContent=label;const sel=document.createElement('select');sel.id=group+'_'+key;for(const v of values){const opt=document.createElement('option');opt.value=v;opt.textContent=v;sel.append(opt)}wrap.append(sel);$(group+'Fields').append(wrap);sel.onchange=()=>{if(!data)return;if(group==='global'){data.defaults[key]=['bpp','alpha_bpp'].includes(key)?Number(sel.value):sel.value;normalize(data.defaults)}else{draft[key]=['bpp','alpha_bpp'].includes(key)?Number(sel.value):sel.value;draft={...data.defaults,...draft};normalize(draft);batchTouched=true}refreshFields();mark();schedulePreview()}}}
-function normalize(x){if(x.type==='MIRROR')x.bpp=0;else if(!Number(x.bpp))x.bpp=1;if(x.type==='BITMAP')x.alpha_bpp=0}
+for(const group of ['global','asset']){for(const [key,label,values] of fields){const wrap=document.createElement('label');wrap.textContent=label;const sel=document.createElement(values?'select':'input');sel.id=group+'_'+key;if(!values)sel.type='color';for(const v of values||[]){const opt=document.createElement('option');opt.value=v;opt.textContent=v;sel.append(opt)}wrap.append(sel);$(group+'Fields').append(wrap);sel.onchange=()=>{if(!data)return;if(group==='global'){data.defaults[key]=['bpp','alpha_bpp'].includes(key)?Number(sel.value):sel.value;normalize(data.defaults)}else{draft[key]=['bpp','alpha_bpp'].includes(key)?Number(sel.value):sel.value;draft={...data.defaults,...draft};normalize(draft);batchTouched=true}refreshFields();mark();schedulePreview()}}}
+function normalize(x){x.quantization??='DOMINANT';x.background_color??='#000000';if(x.type==='MIRROR')x.bpp=0;else if(!Number(x.bpp))x.bpp=1;if(x.type==='BITMAP'||/\.jpe?g$/i.test(x.source||''))x.alpha_bpp=0}
 function effective(){if(!data)return {};const x={...data.defaults,...(mode==='custom'?draft:{})};if(data.color_mode==='fixed'||x.type==='BITMAP')x.color_format=data.defaults.color_format;normalize(x);return x}
 function fieldRule(k,x,asset){
  if(k==='bpp'&&x.type==='MIRROR')return 'MIRROR 不使用索引 BPP，固定为 0';
  if(k==='alpha_bpp'&&x.type==='BITMAP')return 'BITMAP 不支持独立 Alpha，固定为 0';
+ if(asset&&k==='alpha_bpp'&&/\.jpe?g$/i.test(x.source||''))return 'JPEG 没有透明通道，固定为 0';
+ if(k==='quantization'&&x.type!=='BITMAP_WITH_PALETTE')return '仅调色盘图片需要量化算法';
+ if(asset&&k==='background_color'&&(x.alpha_bpp||!sourceInfo[x.source]?.has_alpha))return x.alpha_bpp?'已生成 Alpha 通道，无需背景合成':'源图没有透明度';
  if(asset&&k==='color_format'&&x.type==='BITMAP')return 'BITMAP 不存储 RGB 颜色，沿用全局色彩模型';
  if(asset&&k==='color_format'&&data.color_mode==='fixed')return '色彩模型由全局固定配置决定';
  return '';
@@ -550,7 +554,7 @@ let sourceSizes={},sourceInfo={};
 async function refreshSourceSizes(){
  const current=data;if(!current)return;
  const info=await api('source_info',current.assets.map(a=>a.source));
- if(data!==current)return;sourceInfo=info;sourceSizes=Object.fromEntries(Object.entries(info).map(([source,value])=>[source,value?.bytes??null]));drawTree();updateTotalSize();
+ if(data!==current)return;sourceInfo=info;sourceSizes=Object.fromEntries(Object.entries(info).map(([source,value])=>[source,value?.bytes??null]));drawTree();updateTotalSize();if(selected>=0)schedulePreview(0);
 }
 function encodedSize(settings,width,height){
  const colorBytes={RGB332:1,RGB565:2,RGB888:4}[settings.color_format];
@@ -566,6 +570,15 @@ function updateTotalSize(snapshot=data){
  let total=0,valid=true;
  for(const asset of snapshot.assets){const info=sourceInfo[asset.source],settings={...snapshot.defaults,...asset};if(snapshot.color_mode==='fixed')settings.color_format=snapshot.defaults.color_format;normalize(settings);const size=info&&encodedSize(settings,info.width,info.height);if(size==null)valid=false;else total+=size}
  $('totalSize').textContent=`总计 ${formatBytes(total)}${valid?'':'（部分）'}`;
+}
+function updateSelectionSizes(snapshot,index,temporary){
+ const indices=temporary?[index]:(selectedItems.size?[...selectedItems]:[index]),colorBytes={RGB332:1,RGB565:2,RGB888:4}[snapshot.defaults.color_format]||0,alphaBpp=Number(snapshot.defaults.alpha_bpp)||0;
+ let base=0,current=0,valid=true;
+ for(const i of indices){const asset=snapshot.assets[i],info=sourceInfo[asset.source];if(!info){valid=false;continue}base+=info.width*info.height*colorBytes+Math.ceil(info.width*alphaBpp/8)*info.height;const settings={...snapshot.defaults,...asset};if(snapshot.color_mode==='fixed')settings.color_format=snapshot.defaults.color_format;normalize(settings);const size=encodedSize(settings,info.width,info.height);if(size==null)valid=false;else current+=size}
+ const alphaTerm=alphaBpp?` + Σ(⌈W×${alphaBpp}÷8⌉×H)`:'';
+ const one=sourceInfo[snapshot.assets[index].source],singleAlpha=alphaBpp&&one?` + ⌈${one.width}×${alphaBpp}÷8⌉×${one.height}`:'';
+ const formula=indices.length>1?`${indices.length} 张 · Σ(W×H×${colorBytes} B)${alphaTerm} = ${formatBytes(base)}`:`MIRROR ${snapshot.defaults.color_format} · ${one?.width||'W'}×${one?.height||'H'}×${colorBytes} B${singleAlpha} = ${formatBytes(base)}`;
+ $('dimensions').textContent=formula;$('dimensions').title=formula;$('currentSize').textContent=`${indices.length>1?'独立配置合计':'独立配置'} ${valid?formatBytes(current):'部分不可计算'}`;
 }
 function fileName(a){return a.source.replaceAll('\\','/').split('/').pop()}
 function sortedEntries(assets,order,sizes){
@@ -669,7 +682,7 @@ document.querySelector('aside').addEventListener('mouseleave',restoreSelectedPre
 function resetHover(){hoveredAsset=null;selectedView=null;clearTimeout(previewTimer);request++}
 function schedulePreview(delay=140){clearTimeout(previewTimer);const n=++request;previewTimer=setTimeout(()=>preview(n).catch(e=>{if(n===request)error(e)}),delay)}
 function formatBytes(value){if(value<1024)return value+' B';if(value<1024*1024)return (value/1024).toFixed(value<10240?1:0)+' KB';return (value/1024/1024).toFixed(2)+' MB'}
-async function preview(n){const index=hoveredAsset??selected;if(index<0||!data)return;const temporary=hoveredAsset!==null;const d=clone(data);if(selected>=0)writeDraft(d);const settings={...d.defaults,...d.assets[index]};if(d.color_mode==='fixed')settings.color_format=d.defaults.color_format;normalize(settings);updateTotalSize(d);$('conversionHint').textContent='正在转换…';const r=await api('preview',d,index);if(n!==request)return;imgSize={w:r.width,h:r.height};$('dimensions').textContent=`${temporary?fileName(d.assets[index])+' · ':''}${r.original_format} · ${r.width} × ${r.height} · ${formatBytes(r.source_bytes)}`;$('original').src=r.original;$('original').classList.remove('hidden');$('original').nextElementSibling.classList.add('hidden');$('palette').replaceChildren();const current=r.bytes==null?'不可构建':formatBytes(r.bytes);$('currentSize').textContent=`大小 ${current}`;if(r.converted){$('converted').src=r.converted;$('converted').classList.remove('hidden');$('conversionHint').classList.add('hidden');$('status').textContent='';$('status').classList.remove('error');for(const rgb of r.palette||[]){const sw=document.createElement('span');sw.className='swatch';sw.style.background=`rgb(${rgb.join(',')})`;sw.title=rgb.join(', ');$('palette').append(sw)}}else{$('converted').classList.add('hidden');$('conversionHint').classList.remove('hidden');$('conversionHint').textContent=r.errors.join('；');$('status').textContent='当前参数无法转换'}render()}
+async function preview(n){const index=hoveredAsset??selected;if(index<0||!data)return;const temporary=hoveredAsset!==null;const d=clone(data);if(selected>=0)writeDraft(d);const settings={...d.defaults,...d.assets[index]};if(d.color_mode==='fixed')settings.color_format=d.defaults.color_format;normalize(settings);updateTotalSize(d);updateSelectionSizes(d,index,temporary);$('conversionHint').textContent='正在转换…';const r=await api('preview',d,index);if(n!==request)return;imgSize={w:r.width,h:r.height};$('original').src=r.original;$('original').classList.remove('hidden');$('original').nextElementSibling.classList.add('hidden');$('palette').replaceChildren();if(r.converted){$('converted').src=r.converted;$('converted').classList.remove('hidden');$('conversionHint').classList.add('hidden');$('status').textContent='';$('status').classList.remove('error');for(const rgb of r.palette||[]){const sw=document.createElement('span');sw.className='swatch';sw.style.background=`rgb(${rgb.join(',')})`;sw.title=rgb.join(', ');$('palette').append(sw)}}else{$('converted').classList.add('hidden');$('conversionHint').classList.remove('hidden');$('conversionHint').textContent=r.errors.join('；');$('status').textContent='当前参数无法转换';if(temporary||selectedItems.size<=1)$('currentSize').textContent='独立配置 不可构建'}render()}
 function render(){const views=[...document.querySelectorAll('.viewport')];scale=zoom??Math.min(...views.map(v=>Math.min((v.clientWidth-30)/imgSize.w,(v.clientHeight-30)/imgSize.h)));scale=Math.max(.02,scale);$('scale').textContent=Math.round(scale*100)+'%';for(const id of ['original','converted']){const im=$(id);im.style.width=imgSize.w*scale+'px';im.style.height=imgSize.h*scale+'px';im.style.transform=`translate(calc(-50% + ${pan.x}px),calc(-50% + ${pan.y}px))`}}
 function changeZoom(f){zoom=Math.min(40,Math.max(.02,scale*f));render()}
 for(const v of document.querySelectorAll('.viewport')){let drag;v.onwheel=e=>{e.preventDefault();changeZoom(e.deltaY<0?1.15:1/1.15)};v.onpointerdown=e=>{drag={x:e.clientX,y:e.clientY,px:pan.x,py:pan.y};v.setPointerCapture(e.pointerId)};v.onpointermove=e=>{if(drag){pan={x:drag.px+e.clientX-drag.x,y:drag.py+e.clientY-drag.y};render()}};v.onpointerup=v.onpointercancel=()=>drag=null;new ResizeObserver(render).observe(v)}

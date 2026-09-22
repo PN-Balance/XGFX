@@ -166,7 +166,10 @@ class Api:
             try:
                 with Image.open(path) as opened:
                     width, height = opened.size
-                info[source] = {'bytes': path.stat().st_size, 'width': width, 'height': height}
+                    image_format = opened.format or path.suffix.lstrip('.').upper()
+                    has_alpha = 'A' in opened.getbands() or 'transparency' in opened.info
+                info[source] = {'bytes': path.stat().st_size, 'width': width, 'height': height,
+                                'format': image_format, 'has_alpha': has_alpha}
             except (OSError, ValueError):
                 info[source] = None
         return info
@@ -188,6 +191,8 @@ class Api:
             storage=entry.get('storage', 'MCU'), color_format=entry.get('color_format', 'RGB565'),
             byte_order=data.get('defaults', {}).get('byte_order', 'little'), bpp=int(entry.get('bpp', 0)),
             alpha_bpp=int(entry.get('alpha_bpp', 0)), palette=tuple(entry.get('palette', [])),
+            quantization=entry.get('quantization', 'DOMINANT'),
+            background_color=entry.get('background_color', '#000000'),
             flash_address=core._integer(entry['flash_address']) if entry.get('flash_address') is not None else None)
         return c, core.AssetBuildService().convert(c, allow_auto_flash='flash' in data)
 

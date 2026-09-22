@@ -23,6 +23,7 @@
 14. [资源生成器 xgfx_asset.py](#14-资源生成器-xgfx_assetpy)
 15. [编译与模拟器测试](#15-编译与模拟器测试)
 16. [常见问题与注意事项](#16-常见问题与注意事项)
+17. [真机测试工程](#17-真机测试工程)
 
 ---
 
@@ -924,6 +925,8 @@ xgfx           # 打开网页版 GUI
 | `byte_order` | `little` / `big` | 字节序 |
 | `bpp` | `0`（MIRROR）或 `1~5`（位图） | 颜色位深 |
 | `alpha_bpp` | `0` 或 `1~5` | Alpha 位深（BITMAP 必须 0） |
+| `quantization` | `DOMINANT` / `MEDIAN_CUT` / `MAX_COVERAGE` / `FAST_OCTREE` | 调色板图片的默认量化算法 |
+| `background_color` | `#RRGGBB` | 关闭 Alpha 通道时，透明像素合成使用的背景色 |
 
 **flash（外部 Flash 布局）：**
 
@@ -957,7 +960,13 @@ xgfx           # 打开网页版 GUI
 | `alpha_bpp` | Alpha 位深 |
 | `palette` | 自定义色板（仅 BITMAP_WITH_PALETTE） |
 | `auto_quantize` | 是否自动量化到调色板 |
+| `quantization` | 自动量化算法，可覆盖全局默认值 |
+| `background_color` | 不生成 Alpha 通道时的透明图片合成背景色 |
 | `flash_address` | 外部 Flash 地址（storage=FLASH 时需要） |
+
+JPEG 本身没有 Alpha 通道，因此 JPEG 配置 `alpha_bpp > 0` 会直接报错。PNG 等带透明度的图片如果设置 `alpha_bpp = 0`，生成器会先按 `background_color` 合成成不透明图片，再进行颜色转换和量化；透明区域不会被随意替换成黑色或其他颜色。
+
+`DOMINANT` 适合图标和少量主色的 UI 素材；另外三种算法来自 Pillow，可根据照片、渐变或复杂插画的实际预览效果选择。显式填写 `palette` 时始终优先使用手工色板，不再执行自动量化。
 
 ### 14.5 生成产物
 
@@ -1056,6 +1065,22 @@ python -m unittest tests\test_xgfx_asset.py -v
 - 按 C11 编译，建议开启 `-Wall -Wextra`。
 - `GFX_FILL_BITMAP_BY_BUFF` 宏目前不控制有效绘图分支，无需设置。
 - `GFX_RESOURCE_ALIGNMENT_CHECK_ENABLE` 调试阶段可设为 1 检查资源对齐，发布版可关闭。
+
+---
+
+## 17. 真机测试工程
+
+`example/hardware_usage` 是可直接编译和烧录的完整测试工程，硬件为 PY32F031x8、172×320 ST7789W3 屏幕和 BY25Q80ES 1 MiB SPI NOR Flash。工程已经移除原产品 UI 的编译入口，启动后直接进入 XGFX 测试。
+
+测试包含 10 个案例，覆盖矩形与圆、越界裁剪、MIRROR、BITMAP、BITMAP_WITH_PALETTE、Alpha 混合、固定背景混合、`Cut_Self`、`Cut_Screen`、锚点、缓冲区绝对坐标，以及 MCU 内部 Flash 和外部 Flash 两种资源来源。由于目标芯片只有 8 KiB RAM，图片通过窄条缓冲逐段解码和刷新，避免申请整屏缓冲。
+
+按键操作：
+
+- 按键 1 短按：下一个案例；长按：开始或停止每 1.8 秒自动轮播。
+- 按键 2 短按：返回第一个案例。
+- 按键 3 长按：关闭背光并释放电源保持信号。
+
+`example/hardware_usage/DEPLOY` 中提供 MCU 的 HEX/BIN、外部 Flash 紧凑镜像和填充到 1 MiB 的完整镜像。具体烧录地址、文件校验值和资源占用见该目录的 `README.md`。测试图片的来源和许可见 `example/hardware_usage/GFX_Test/SOURCES.md`。
 
 ---
 

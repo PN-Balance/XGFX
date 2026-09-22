@@ -6,7 +6,7 @@ xgfx_assets.json, edit that file, then run this script again to build assets.
 
 from __future__ import annotations
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 # ---- model ----
 
@@ -36,6 +36,8 @@ class AssetConfig:
     alpha_bpp: int = 0
     palette: tuple[str, ...] = ()
     auto_quantize: bool = False
+    quantization: str = "DOMINANT"
+    background_color: str = "#000000"
     flash_address: int | None = None
 
 
@@ -385,6 +387,8 @@ def load_project(path: str | Path) -> tuple[dict[str, Any], list[AssetConfig]]:
             byte_order=item.get("byte_order", "little").lower(),
             bpp=_integer(item.get("bpp", 0)), alpha_bpp=_integer(item.get("alpha_bpp", 0)),
             palette=tuple(item.get("palette", [])), auto_quantize=bool(item.get("auto_quantize", False)),
+            quantization=str(item.get("quantization", "DOMINANT")).upper(),
+            background_color=str(item.get("background_color", "#000000")),
             flash_address=_integer(item["flash_address"]) if item.get("flash_address") is not None else None,
         ))
     return raw, assets
@@ -402,9 +406,15 @@ def validate_config(config: AssetConfig, allow_auto_flash: bool = False) -> list
     if config.image_type != "MIRROR" and not 1 <= config.bpp <= 5: error("bpp", "indexed images require BPP from 1 to 5")
     if config.image_type == "MIRROR" and config.bpp != 0: error("bpp", "MIRROR BPP must be 0")
     if config.image_type == "BITMAP" and config.alpha_bpp: error("alpha", "BITMAP cannot contain independent Alpha")
+    if config.source.suffix.lower() in {'.jpg', '.jpeg'} and config.alpha_bpp:
+        error("alpha", "JPEG does not contain an Alpha channel")
     if config.alpha_bpp and not 1 <= config.alpha_bpp <= 5: error("alpha_bpp", "Alpha BPP must be from 1 to 5")
     if config.image_type != "BITMAP_WITH_PALETTE" and config.palette: error("palette", "only BITMAP_WITH_PALETTE accepts a palette")
     if config.palette and len(config.palette) > (1 << config.bpp): error("palette", "palette has more entries than BPP permits")
+    if config.quantization not in {"DOMINANT", "MEDIAN_CUT", "MAX_COVERAGE", "FAST_OCTREE"}:
+        error("quantization", "unsupported palette quantization algorithm")
+    try: parse_rgb(config.background_color)
+    except ValueError: error("background_color", "background color must be #RRGGBB")
     if config.storage == "FLASH" and config.flash_address is None and not allow_auto_flash:
         error("flash_address", "FLASH storage requires flash_address or project flash auto-layout")
     if not config.source.is_file(): error("source", f"source file does not exist: {config.source}")
@@ -448,8 +458,16 @@ def _palette_indices(rgb_pixels: list[tuple[int, int, int]], config: AssetConfig
     maximum = 1 << config.bpp
     if config.palette:
         rgb_palette = [parse_rgb(item) for item in config.palette]
-    else:
+    elif config.quantization == "DOMINANT":
         rgb_palette = _dominant_palette(rgb_pixels, maximum, alpha if config.alpha_bpp else None)
+    else:
+        method = {"MEDIAN_CUT": Image.Quantize.MEDIANCUT, "MAX_COVERAGE": Image.Quantize.MAXCOVERAGE,
+                  "FAST_OCTREE": Image.Quantize.FASTOCTREE}[config.quantization]
+        sample = Image.new("RGB", (len(rgb_pixels), 1)); sample.putdata(rgb_pixels)
+        quantized = sample.quantize(colors=maximum, method=method, dither=Image.Dither.NONE)
+        raw_palette = quantized.getpalette() or []
+        used = sorted(set(quantized.getdata()))
+        rgb_palette = [tuple(raw_palette[i*3:i*3+3]) for i in used]
     # Compare against representable device colors, including RGB565 rounding.
     device_palette = list(dict.fromkeys(color_to_device(rgb, config.color_format) for rgb in rgb_palette))
     rendered_palette = [device_to_rgb(value, config.color_format) for value in device_palette]
@@ -468,6 +486,10 @@ def encode_asset(config: AssetConfig) -> EncodedAsset:
     rgba = list(image.get_flattened_data())
     rgb = [(r, g, b) for r, g, b, _ in rgba]
     alpha = [a for _, _, _, a in rgba]
+    if not config.alpha_bpp and any(a < 255 for a in alpha):
+        br, bg, bb = parse_rgb(config.background_color)
+        rgb = [(round((r*a + br*(255-a))/255), round((g*a + bg*(255-a))/255),
+                round((b*a + bb*(255-a))/255)) for (r, g, b), a in zip(rgb, alpha)]
     alpha_data = b""
     if config.alpha_bpp:
         alpha_data = pack_rows(quantize_alpha(alpha, config.alpha_bpp), width, height, config.alpha_bpp)
@@ -649,7 +671,8 @@ def initialize_project(directory: str | Path, manifest_name: str = "xgfx_assets.
         "defaults": {
             "type": "MIRROR", "storage": storage.upper(),
             "color_format": color_format.upper(), "byte_order": byte_order.lower(),
-            "bpp": 0, "alpha_bpp": 0,
+            "bpp": 0, "alpha_bpp": 0, "quantization": "DOMINANT",
+            "background_color": "#000000",
         },
         "flash": {"base_address": "0x0", "alignment": 1, "fill_byte": 255},
         "output": {

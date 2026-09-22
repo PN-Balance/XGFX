@@ -1,0 +1,66 @@
+/.vscode
+
+/Debugconfig
+
+/EIDE
+
+/Output
+
+/Inc
+
+/EWARM
+
+/RTE
+
+/UI Source
+/UI_CArray
+/UI_My
+
+# 原产品模块和当前 XGFX 测试目标未引用的 SDK 内容仅保留在本机
+/1 - Application
+/2 - Business
+/A00 Document
+/Drivers/BSP
+/Drivers/CMSIS/DSP_Lib
+/Drivers/CMSIS/RTOS
+/0 - User/User.c
+/0 - User/User_Data.c
+/0 - User/User_Data.h
+
+/3 - Function/*
+!/3 - Function/Key.c
+!/3 - Function/Key.h
+!/3 - Function/Key_Port.c
+
+/4 - Hardware/*
+!/4 - Hardware/BY25Q80.c
+!/4 - Hardware/BY25Q80.h
+!/4 - Hardware/HKND_St7789W3.c
+!/4 - Hardware/HKND_St7789W3.h
+!/4 - Hardware/Cap7618B.h
+
+/5 - Basic/*
+!/5 - Basic/Delay.c
+!/5 - Basic/Delay.h
+!/5 - Basic/Delay_Port.c
+!/5 - Basic/Tick.c
+!/5 - Basic/Tick.h
+!/5 - Basic/Tick_Port.c
+!/5 - Basic/Power.h
+!/5 - Basic/Power_Port.c
+
+/7 - C Lib/*
+!/7 - C Lib/Easy_Func.c
+!/7 - C Lib/Easy_Func.h
+!/7 - C Lib/General_Type.h
+
+Jlink*
+
+Project*
+
+*.scvd
+
+!Project.uvprojx
+
+
+*.psd

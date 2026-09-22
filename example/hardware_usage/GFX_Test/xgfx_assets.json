@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "color_mode": "fixed",
+  "defaults": {
+    "type": "MIRROR",
+    "storage": "FLASH",
+    "color_format": "RGB565",
+    "byte_order": "little",
+    "bpp": 0,
+    "alpha_bpp": 0,
+    "quantization": "DOMINANT",
+    "background_color": "#10151f"
+  },
+  "flash": {
+    "base_address": "0x0",
+    "alignment": 4,
+    "fill_byte": 255
+  },
+  "output": {
+    "directory": "generated",
+    "code_directory": "generated",
+    "name": "gfx_test_assets",
+    "flash_file": "gfx_test_assets.bin",
+    "write_individual_bins": false,
+    "write_previews": true
+  },
+  "assets": [
+    {
+      "id": "landscape-mirror",
+      "name": "GFX_Test_Landscape_Mirror",
+      "source": "source_images/landscape_172x112.png"
+    },
+    {
+      "id": "landscape-palette",
+      "name": "GFX_Test_Landscape_Palette4",
+      "source": "source_images/landscape_172x112.png",
+      "type": "BITMAP_WITH_PALETTE",
+      "bpp": 4,
+      "quantization": "MEDIAN_CUT"
+    },
+    {
+      "id": "gear-alpha",
+      "name": "GFX_Test_Gear_Alpha4",
+      "source": "source_images/gear_96.png",
+      "alpha_bpp": 4
+    },
+    {
+      "id": "gear-palette",
+      "name": "GFX_Test_Gear_Palette2_Alpha2",
+      "source": "source_images/gear_96.png",
+      "type": "BITMAP_WITH_PALETTE",
+      "bpp": 2,
+      "alpha_bpp": 2,
+      "quantization": "MAX_COVERAGE"
+    },
+    {
+      "id": "mono-bitmap",
+      "name": "GFX_Test_Mono_Bitmap1",
+      "source": "source_images/mono_mask.png",
+      "type": "BITMAP",
+      "bpp": 1
+    },
+    {
+      "id": "mcu-landscape",
+      "name": "GFX_Test_MCU_Landscape_Mirror",
+      "source": "source_images/landscape_64x40.png",
+      "storage": "MCU"
+    },
+    {
+      "id": "mcu-gear-alpha",
+      "name": "GFX_Test_MCU_Gear_Palette2_Alpha2",
+      "source": "source_images/gear_40.png",
+      "storage": "MCU",
+      "type": "BITMAP_WITH_PALETTE",
+      "bpp": 2,
+      "alpha_bpp": 2,
+      "quantization": "MAX_COVERAGE"
+    },
+    {
+      "id": "mcu-mono-bitmap",
+      "name": "GFX_Test_MCU_Mono_Bitmap1",
+      "source": "source_images/mono_mask_32.png",
+      "storage": "MCU",
+      "type": "BITMAP",
+      "bpp": 1
+    }
+  ]
+}

@@ -145,6 +145,30 @@ class BuildTests(unittest.TestCase):
             self.assertTrue(any(item.code == "alpha" for item in result.diagnostics))
             self.assertFalse((root / "generated").exists())
 
+    def test_jpeg_rejects_alpha_channel(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "photo.jpg"
+            Image.new("RGB", (1, 1), (200, 100, 50)).save(path)
+            config = xgfx_asset.AssetConfig(name="Photo", source=path, image_type="MIRROR",
+                                            color_format="RGB565", alpha_bpp=2)
+            result = AssetBuildService().convert(config)
+            self.assertFalse(result.succeeded)
+            self.assertTrue(any(item.code == "alpha" for item in result.diagnostics))
+
+    def test_transparency_without_alpha_flattens_to_background_color(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "transparent.png"
+            image = Image.new("RGBA", (2, 1))
+            image.putdata([(255, 0, 0, 0), (255, 0, 0, 128)])
+            image.save(path)
+            config = xgfx_asset.AssetConfig(name="Flat", source=path, image_type="MIRROR",
+                                            color_format="RGB888", background_color="#0000FF")
+            result = AssetBuildService().convert(config)
+            self.assertTrue(result.succeeded, result.diagnostics)
+            colors = xgfx_asset.deserialize_colors(result.assets[0].color_data, "RGB888", "little")
+            self.assertEqual(colors[0], 0x0000FF)
+            self.assertEqual(colors[1], 0x80007F)
+
     def test_flash_binary_uses_contiguous_alpha_address(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
