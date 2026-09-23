@@ -53,6 +53,54 @@ extern "C" {
     #define GFX_RESOURCE_ALIGNMENT_CHECK_ENABLE ( 0 )
 #endif
 
+/* Compile-time image decoder switches. Keep enabled to accept existing assets;
+ * a disabled type/BPP is rejected before any destination pixel is modified. */
+#ifndef GFX_MIRROR_ENABLE
+    #define GFX_MIRROR_ENABLE ( 1 )
+#endif
+#ifndef GFX_BITMAP_ENABLE
+    #define GFX_BITMAP_ENABLE ( 1 )
+#endif
+#ifndef GFX_BITMAP_WITH_PALETTE_ENABLE
+    #define GFX_BITMAP_WITH_PALETTE_ENABLE ( 1 )
+#endif
+#ifndef GFX_ALPHA_ENABLE
+    #define GFX_ALPHA_ENABLE ( 1 )
+#endif
+#ifndef GFX_COLOR_BPP_1_ENABLE
+    #define GFX_COLOR_BPP_1_ENABLE ( 1 )
+#endif
+#ifndef GFX_COLOR_BPP_2_ENABLE
+    #define GFX_COLOR_BPP_2_ENABLE ( 1 )
+#endif
+#ifndef GFX_COLOR_BPP_3_ENABLE
+    #define GFX_COLOR_BPP_3_ENABLE ( 1 )
+#endif
+#ifndef GFX_COLOR_BPP_4_ENABLE
+    #define GFX_COLOR_BPP_4_ENABLE ( 1 )
+#endif
+#ifndef GFX_COLOR_BPP_5_ENABLE
+    #define GFX_COLOR_BPP_5_ENABLE ( 1 )
+#endif
+#ifndef GFX_ALPHA_BPP_1_ENABLE
+    #define GFX_ALPHA_BPP_1_ENABLE ( 1 )
+#endif
+#ifndef GFX_ALPHA_BPP_2_ENABLE
+    #define GFX_ALPHA_BPP_2_ENABLE ( 1 )
+#endif
+#ifndef GFX_ALPHA_BPP_3_ENABLE
+    #define GFX_ALPHA_BPP_3_ENABLE ( 1 )
+#endif
+#ifndef GFX_ALPHA_BPP_4_ENABLE
+    #define GFX_ALPHA_BPP_4_ENABLE ( 1 )
+#endif
+#ifndef GFX_ALPHA_BPP_5_ENABLE
+    #define GFX_ALPHA_BPP_5_ENABLE ( 1 )
+#endif
+#ifndef GFX_FIXED_BACKGROUND_LUT_ENABLE
+    #define GFX_FIXED_BACKGROUND_LUT_ENABLE ( 1 )
+#endif
+
 /* --- 屏幕颜色类型选择（三选一，决定 GFX_Color_t 的位宽） ------------------------------------------------------------------ */
 
 // 可供选择的颜色类型
@@ -162,6 +210,14 @@ extern "C" {
     #define GFX_COLOR_ALIGNAS _Alignas( GFX_Color_t )
 #elif defined(__GNUC__) || defined(__clang__)
     #define GFX_COLOR_ALIGNAS __attribute__(( aligned( sizeof( GFX_Color_t ) ) ))
+#elif defined(__CC_ARM)
+    #if (GFX_COLOR_TYPE == GFX_COLOR_TYPE_RGB888)
+        #define GFX_COLOR_ALIGNAS __align(4)
+    #elif (GFX_COLOR_TYPE == GFX_COLOR_TYPE_RGB565)
+        #define GFX_COLOR_ALIGNAS __align(2)
+    #else
+        #define GFX_COLOR_ALIGNAS
+    #endif
 #elif defined(__ICCARM__)
     #define GFX_COLOR_ALIGNAS _Pragma("data_alignment=4")
 #else

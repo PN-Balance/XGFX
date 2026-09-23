@@ -1066,21 +1066,37 @@ python -m unittest tests\test_xgfx_asset.py -v
 - `GFX_FILL_BITMAP_BY_BUFF` 宏目前不控制有效绘图分支，无需设置。
 - `GFX_RESOURCE_ALIGNMENT_CHECK_ENABLE` 调试阶段可设为 1 检查资源对齐，发布版可关闭。
 
+### 16.5 按项目裁剪解码功能
+
+`GFX_Define.h` 提供编译期开关，默认全部为 `1`，所以现有资源无需修改。关闭的格式或位深会在绘图开始前安全返回，目标屏幕或 Buffer 不会被部分修改。
+
+| 开关 | 控制内容 |
+|---|---|
+| `GFX_MIRROR_ENABLE` | MIRROR 图片 |
+| `GFX_BITMAP_ENABLE` | BITMAP 图片 |
+| `GFX_BITMAP_WITH_PALETTE_ENABLE` | BITMAP_WITH_PALETTE 图片 |
+| `GFX_ALPHA_ENABLE` | 所有独立 Alpha 平面 |
+| `GFX_COLOR_BPP_1_ENABLE` … `GFX_COLOR_BPP_5_ENABLE` | 两种位图的各颜色 BPP |
+| `GFX_ALPHA_BPP_1_ENABLE` … `GFX_ALPHA_BPP_5_ENABLE` | 各 Alpha BPP |
+| `GFX_FIXED_BACKGROUND_LUT_ENABLE` | 工作区足够时，为固定背景混色建立查找表 |
+
+例如产品只使用 MIRROR 和 4 BPP 色板图，可关闭 BITMAP、颜色 BPP 1/2/3/5 以及不使用的 Alpha 位深。描述符布局保持不变，因此同一份资源文件仍兼容功能完整的固件；功能裁剪固件遇到不支持的资产只会跳过。
+
 ---
 
 ## 17. 真机测试工程
 
 `example/hardware_usage` 是可直接编译和烧录的完整测试工程，硬件为 PY32F031x8、172×320 ST7789W3 屏幕和 BY25Q80ES 1 MiB SPI NOR Flash。工程已经移除原产品 UI 的编译入口，启动后直接进入 XGFX 测试。
 
-测试包含 10 个案例，覆盖矩形与圆、越界裁剪、MIRROR、BITMAP、BITMAP_WITH_PALETTE、Alpha 混合、固定背景混合、`Cut_Self`、`Cut_Screen`、锚点、缓冲区绝对坐标，以及 MCU 内部 Flash 和外部 Flash 两种资源来源。由于目标芯片只有 8 KiB RAM，图片通过窄条缓冲逐段解码和刷新，避免申请整屏缓冲。
+测试包含 18 个案例，覆盖矩形与圆、越界裁剪、三种图片类型、颜色 1–5 BPP、Alpha 1–5 BPP、两种混合背景、`Cut_Self`、`Cut_Screen`、九点锚点、缓冲区绝对坐标，以及 MCU 内部 Flash 和外部 Flash 两种资源来源。由于目标芯片只有 8 KiB RAM，图片通过窄条缓冲逐段解码和刷新，避免申请整屏缓冲。
 
 按键操作：
 
-- 按键 1 短按：下一个案例；长按：开始或停止每 1.8 秒自动轮播。
+- 按键 1 短按：下一个案例；长按：开始或停止每 2.2 秒自动轮播。
 - 按键 2 短按：返回第一个案例。
 - 按键 3 长按：关闭背光并释放电源保持信号。
 
-`example/hardware_usage/DEPLOY` 中提供 MCU 的 HEX/BIN、外部 Flash 紧凑镜像和填充到 1 MiB 的完整镜像。具体烧录地址、文件校验值和资源占用见该目录的 `README.md`。测试图片的来源和许可见 `example/hardware_usage/GFX_Test/SOURCES.md`。
+`example/hardware_usage/DEPLOY` 中提供 MCU 的 HEX/BIN、外部 Flash 紧凑镜像和填充到 1 MiB 的完整镜像。逐案例理想画面和判定方法见 `example/hardware_usage/TEST_GUIDE.md`，烧录方法见该目录的 `README.md`。
 
 ---
 

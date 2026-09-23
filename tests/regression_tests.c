@@ -873,6 +873,50 @@ static int test_buffer_image_advanced_cut_areas( void )
            expect_buffer_color( "buffer cuts lower exclusion", pixels, 4, 2, 3, black ) ;
 }
 
+static void pack_test_values( uint8_t * bytes, uint16_t count, uint8_t bpp )
+{
+    uint16_t i ;
+    memset( bytes, 0, 16 ) ;
+    for( i = 0 ; i < count ; ++i )
+    {
+        uint8_t value = (uint8_t)(i & ((1u << bpp) - 1u)) ;
+        uint8_t bit ;
+        for( bit = 0 ; bit < bpp ; ++bit )
+            if( value & (1u << bit) ) bytes[((uint32_t)i*bpp+bit)>>3] |= (uint8_t)(1u << (((uint32_t)i*bpp+bit)&7u)) ;
+    }
+}
+
+static int test_packed_decoder_all_bpp( void )
+{
+    uint8_t packed[16] ;
+    GFX_Color_t pixels[17] ;
+    GFX_Color_t palette[32] ;
+    Area_t area = {0,0,17,1} ;
+    GFX_Buffer_t buffer ;
+    uint8_t bpp ;
+    reset_gfx() ;
+    if( !GFX_Buffer_Init(&buffer,&area,pixels,sizeof(pixels)) ) return 0 ;
+    for( bpp=1 ; bpp<=5 ; ++bpp )
+    {
+        uint16_t i ;
+        GFX_Img_t image ;
+        memset(&image,0,sizeof(image));
+        pack_test_values(packed,17,bpp);
+        for(i=0;i<(1u<<bpp);++i) palette[i]=(GFX_Color_t)(i+1u);
+        image.W=17; image.H=1; image.Color_Type=GFX_COLOR_TYPE_BITMAP_WITH_PALETTE;
+        image.Color_Save_Way=GFX_Save_Way_MCU; image.Color_Bits_Per_Pix=bpp;
+        image.Color_Save_Info.C_Array=packed;
+        memset(pixels,0,sizeof(pixels));
+        {
+            GFX_Buff_Img_Adv_Para_t p;
+            memset(&p,0,sizeof(p));p.Buff=&buffer;p.Img=&image;p.Anchor=Anchor_LT;
+            p.Enable_Map=0xffffffffu;p.Palette=palette;GFX_Buff_Img_Adv(&p);
+        }
+        for(i=0;i<17;++i) if(pixels[i]!=palette[i&((1u<<bpp)-1u)]) return 0;
+    }
+    return 1;
+}
+
 int main( void )
 {
     RUN_TEST( test_uninitialized_and_null_calls_are_safe ) ;
@@ -901,6 +945,7 @@ int main( void )
     RUN_TEST( test_buffer_advanced_alpha_flash ) ;
     RUN_TEST( test_fill_image_advanced_cut_areas ) ;
     RUN_TEST( test_buffer_image_advanced_cut_areas ) ;
+    RUN_TEST( test_packed_decoder_all_bpp ) ;
 
     printf( "\n%u tests, %u failed\n", s_TestsRun, s_TestsFailed ) ;
     return s_TestsFailed == 0 ? 0 : 1 ;

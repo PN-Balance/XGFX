@@ -69,6 +69,7 @@ static uint8_t * prv_GFX_Align_Color_Ptr( uint8_t * Ptr ) ;
 static void prv_GFX_Fill_HLine_Clipped( GFX_Color_t Color , int32_t X0 , int32_t X1 , int32_t Y ) ;
 static void prv_GFX_Buff_HLine_Clipped( const GFX_Buffer_t * Buff , GFX_Color_t Color ,
                                         int32_t X0 , int32_t X1 , int32_t Y ) ;
+static uint8_t prv_Buff_Read_Packed_Value( const uint8_t * Row , uint32_t Bit_Position , uint8_t BPP ) ;
 
 /* 按色彩类型拆分 Fill_Img 实现，避免 GFX_Fill_Img 主体过长 */
 static void prv_Fill_Img_Mirror              ( const GFX_Img_t * Img , int16_t X , int16_t Y , const Area_t * Com ) ;
@@ -122,7 +123,11 @@ static bool prv_GFX_Buffer_Is_Valid( const GFX_Buffer_t * Buff )
 /* 将任意字节地址向上对齐到 GFX_Color_t 的对齐边界。 */
 static uint8_t * prv_GFX_Align_Color_Ptr( uint8_t * Ptr )
 {
+#if defined(__CC_ARM)
+    const uintptr_t alignment = (uintptr_t)sizeof( GFX_Color_t ) ;
+#else
     const uintptr_t alignment = (uintptr_t)_Alignof( GFX_Color_t ) ;
+#endif
     
     
     uintptr_t address = (uintptr_t)Ptr ;
@@ -597,25 +602,34 @@ void GFX_Color_Get_RGB( GFX_Color_t color, uint8_t *r , uint8_t *g , uint8_t *b 
 /**
  * @brief Alpha 混合：结果 = (fg * alpha + bg * (max_alpha - alpha)) / max_alpha
  */
-GFX_Color_t GFX_Color_AlphaBlend( GFX_Color_t bg , GFX_Color_t fg , uint8_t alpha, uint8_t max_alpha )
+static GFX_Color_t prv_GFX_Color_AlphaBlend_Fast( GFX_Color_t bg , GFX_Color_t fg , uint8_t alpha, uint8_t max_alpha )
 {
     if( max_alpha == 0 ) return bg ;
     if( alpha >= max_alpha ) return fg ;
     if( alpha == 0 ) return bg ;
-
-    uint8_t br, bg_c, bb ;
-    uint8_t fr, fg_c, fb ;
-    GFX_Color_Get_RGB( bg, &br, &bg_c, &bb );
-    GFX_Color_Get_RGB( fg, &fr, &fg_c, &fb );
-
     uint16_t a = alpha ;
     uint16_t ia = (uint16_t)( max_alpha - alpha ) ;
+#if ( GFX_COLOR_TYPE == GFX_COLOR_TYPE_RGB565 )
+    uint16_t r = (uint16_t)((((fg >> 11) & 31u) * a + ((bg >> 11) & 31u) * ia) / max_alpha) ;
+    uint16_t g = (uint16_t)((((fg >> 5)  & 63u) * a + ((bg >> 5)  & 63u) * ia) / max_alpha) ;
+    uint16_t b = (uint16_t)((( fg        & 31u) * a + ( bg        & 31u) * ia) / max_alpha) ;
+    return (GFX_Color_t)((r << 11) | (g << 5) | b) ;
+#elif ( GFX_COLOR_TYPE == GFX_COLOR_TYPE_RGB332 )
+    uint8_t r = (uint8_t)((((fg >> 5) & 7u) * a + ((bg >> 5) & 7u) * ia) / max_alpha) ;
+    uint8_t g = (uint8_t)((((fg >> 2) & 7u) * a + ((bg >> 2) & 7u) * ia) / max_alpha) ;
+    uint8_t b = (uint8_t)((( fg       & 3u) * a + ( bg       & 3u) * ia) / max_alpha) ;
+    return (GFX_Color_t)((r << 5) | (g << 2) | b) ;
+#else
+    uint32_t r = ((((uint32_t)fg >> 16) & 255u) * a + (((uint32_t)bg >> 16) & 255u) * ia) / max_alpha ;
+    uint32_t g = ((((uint32_t)fg >> 8)  & 255u) * a + (((uint32_t)bg >> 8)  & 255u) * ia) / max_alpha ;
+    uint32_t b = (((uint32_t)fg         & 255u) * a + ((uint32_t)bg         & 255u) * ia) / max_alpha ;
+    return (GFX_Color_t)((r << 16) | (g << 8) | b) ;
+#endif
+}
 
-    uint8_t r = (uint8_t)( ( fr * a + br * ia ) / max_alpha ) ;
-    uint8_t g = (uint8_t)( ( fg_c * a + bg_c * ia ) / max_alpha ) ;
-    uint8_t b = (uint8_t)( ( fb * a + bb * ia ) / max_alpha ) ;
-
-    return GFX_Color_Convert( ( (uint32_t)r << 16 ) | ( (uint32_t)g << 8 ) | b ) ;
+GFX_Color_t GFX_Color_AlphaBlend( GFX_Color_t bg , GFX_Color_t fg , uint8_t alpha, uint8_t max_alpha )
+{
+    return prv_GFX_Color_AlphaBlend_Fast( bg, fg, alpha, max_alpha ) ;
 }
 
 /**
@@ -661,8 +675,12 @@ void GFX_Create_Color_Palette( uint8_t BPP, GFX_Color_t *Palette, uint32_t Front
     // 约定：索引 0 = Back_Color, 索引 max = Front_Color；与 Bitmap 的一般用法一致
     for( uint16_t i = 0 ; i < count ; i++ )
     {
-        double ratio = (double)i / (double)( count - 1 ) ;
-        uint32_t c = GFX_Color_Transiton_RGB888( Back_Color, Front_Color, ratio );
+        uint32_t max_index = (uint32_t)( count - 1u ) ;
+        uint32_t inv = max_index - i ;
+        uint32_t r = ((((Back_Color >> 16) & 255u) * inv) + (((Front_Color >> 16) & 255u) * i)) / max_index ;
+        uint32_t g = ((((Back_Color >> 8) & 255u) * inv) + (((Front_Color >> 8) & 255u) * i)) / max_index ;
+        uint32_t b = (((Back_Color & 255u) * inv) + ((Front_Color & 255u) * i)) / max_index ;
+        uint32_t c = (r << 16) | (g << 8) | b ;
         Palette[ i ] = GFX_Color_Convert( c ) ;
     }
 }
@@ -844,13 +862,7 @@ static void prv_Fill_Img_Bitmap_Core( const GFX_Img_t * Img , int16_t X , int16_
                 uint16_t bit_pos = bit_offset ;
                 for( uint16_t p = 0 ; p < Com->W ; p++ )
                 {
-                    uint16_t val = 0 ;
-                    for( uint16_t b = 0 ; b < bpp ; b++ )
-                    {
-                        uint16_t cur = bit_pos + b ;
-                        uint8_t  bit = ( bmp_buf[ cur / 8 ] >> ( cur % 8 ) ) & 0x01 ;
-                        val |= (uint16_t)( bit << b ) ;
-                    }
+                    uint16_t val = prv_Buff_Read_Packed_Value( bmp_buf, bit_pos, bpp ) ;
                     disp_row[ p ] = Palette[ val ] ;
                     bit_pos += bpp ;
                 }
@@ -893,13 +905,7 @@ static void prv_Fill_Img_Bitmap_Core( const GFX_Img_t * Img , int16_t X , int16_
                 uint16_t bit_pos = bit_offset ;
                 for( uint16_t p = 0 ; p < Com->W ; p++ )
                 {
-                    uint16_t val = 0 ;
-                    for( uint16_t b = 0 ; b < bpp ; b++ )
-                    {
-                        uint16_t cur = bit_pos + b ;
-                        uint8_t  bit = ( bmp_buf[ cur / 8 ] >> ( cur % 8 ) ) & 0x01 ;
-                        val |= (uint16_t)( bit << b ) ;
-                    }
+                    uint16_t val = prv_Buff_Read_Packed_Value( bmp_buf, bit_pos, bpp ) ;
                     /* 被屏蔽的索引显示 Back_Color 背景色，其余显示对应调色板颜色 */
                     disp_row[ p ] = ( ( Enable_Map >> val ) & 1u ) ? Palette[ val ] : Back_Color ;
                     bit_pos += bpp ;
@@ -930,6 +936,23 @@ static void prv_Fill_Img_Bitmap_With_Palette( const GFX_Img_t * Img , int16_t X 
     prv_Fill_Img_Bitmap_Core( Img , X , Y , Com , The_GFX.Palette , 0xFFFFFFFF , The_GFX.Palette[0] ) ;
 }
 
+static bool prv_GFX_Img_Feature_Is_Enabled( const GFX_Img_t * Img )
+{
+    static const uint8_t color_bpp[6] = {0,GFX_COLOR_BPP_1_ENABLE,GFX_COLOR_BPP_2_ENABLE,
+                                           GFX_COLOR_BPP_3_ENABLE,GFX_COLOR_BPP_4_ENABLE,GFX_COLOR_BPP_5_ENABLE};
+    static const uint8_t alpha_bpp[6] = {0,GFX_ALPHA_BPP_1_ENABLE,GFX_ALPHA_BPP_2_ENABLE,
+                                           GFX_ALPHA_BPP_3_ENABLE,GFX_ALPHA_BPP_4_ENABLE,GFX_ALPHA_BPP_5_ENABLE};
+    if( Img == NULL ) return false ;
+    if( (Img->Color_Type == GFX_COLOR_TYPE_MIRROR && !GFX_MIRROR_ENABLE) ||
+        (Img->Color_Type == GFX_COLOR_TYPE_BITMAP && !GFX_BITMAP_ENABLE) ||
+        (Img->Color_Type == GFX_COLOR_TYPE_BITMAP_WITH_PALETTE && !GFX_BITMAP_WITH_PALETTE_ENABLE) ) return false ;
+    if( Img->Color_Type != GFX_COLOR_TYPE_MIRROR &&
+        (Img->Color_Bits_Per_Pix < 1u || Img->Color_Bits_Per_Pix > 5u || !color_bpp[Img->Color_Bits_Per_Pix]) ) return false ;
+    if( Img->Alpha_Enable && (!GFX_ALPHA_ENABLE || Img->Alpha_Bits_Per_Pix < 1u ||
+        Img->Alpha_Bits_Per_Pix > 5u || !alpha_bpp[Img->Alpha_Bits_Per_Pix]) ) return false ;
+    return true ;
+}
+
 /**
  * @brief 在指定位置填充图片（简单版：左上角对齐，默认配色）
  *
@@ -942,7 +965,8 @@ static void prv_Fill_Img_Bitmap_With_Palette( const GFX_Img_t * Img , int16_t X 
 void GFX_Fill_Img( const GFX_Img_t * Img , int16_t X , int16_t Y )
 {
     if( !prv_GFX_Is_Ready() ) return ;
-    if( !Img || Img->W == 0 || Img->H == 0 || Img->Color_Type == GFX_COLOR_TYPE_NONE ) return ;
+    if( !Img || Img->W == 0 || Img->H == 0 || Img->Color_Type == GFX_COLOR_TYPE_NONE ||
+        !prv_GFX_Img_Feature_Is_Enabled( Img ) ) return ;
     if( Img->Color_Save_Way != GFX_Save_Way_MCU && Img->Color_Save_Way != GFX_Save_Way_Flash ) return ;
     if( Img->Color_Save_Way == GFX_Save_Way_MCU && Img->Color_Save_Info.C_Array == NULL ) return ;
     if( Img->Color_Type == GFX_COLOR_TYPE_BITMAP && Img->Alpha_Enable ) return ;
@@ -1079,7 +1103,8 @@ void GFX_Fill_Img_Adv( GFX_Fill_Img_Adv_Para_t * Para )
     if( !prv_GFX_Is_Ready() ) return ;
     if( !Para || !Para->Img ) return ;
     const GFX_Img_t * img = Para->Img ;
-    if( img->W == 0 || img->H == 0 || img->Color_Type == GFX_COLOR_TYPE_NONE ) return ;
+    if( img->W == 0 || img->H == 0 || img->Color_Type == GFX_COLOR_TYPE_NONE ||
+        !prv_GFX_Img_Feature_Is_Enabled( img ) ) return ;
     if( img->Color_Save_Way != GFX_Save_Way_MCU && img->Color_Save_Way != GFX_Save_Way_Flash ) return ;
     if( img->Color_Save_Way == GFX_Save_Way_MCU && img->Color_Save_Info.C_Array == NULL ) return ;
     if( img->Color_Type == GFX_COLOR_TYPE_BITMAP && img->Alpha_Enable ) return ;
@@ -1196,15 +1221,31 @@ void GFX_Buff_Bg( const GFX_Buffer_t * Buff , GFX_Color_t Color )
 static bool prv_Buff_Img_Is_Valid( const GFX_Buffer_t * Buff , const GFX_Img_t * Img )
 {
     if( !prv_GFX_Is_Ready() || !prv_GFX_Buffer_Is_Valid( Buff ) ) return false ;
-    if( Img == NULL || Img->W == 0 || Img->H == 0 || Img->Color_Type == GFX_COLOR_TYPE_NONE ) return false ;
+    if( Img == NULL || Img->W == 0 || Img->H == 0 || Img->Color_Type == GFX_COLOR_TYPE_NONE ||
+        !prv_GFX_Img_Feature_Is_Enabled( Img ) ) return false ;
     if( Img->Color_Save_Way != GFX_Save_Way_MCU && Img->Color_Save_Way != GFX_Save_Way_Flash ) return false ;
     if( Img->Color_Save_Way == GFX_Save_Way_MCU && Img->Color_Save_Info.C_Array == NULL ) return false ;
+    if( ( Img->Color_Type == GFX_COLOR_TYPE_MIRROR && !GFX_MIRROR_ENABLE ) ||
+        ( Img->Color_Type == GFX_COLOR_TYPE_BITMAP && !GFX_BITMAP_ENABLE ) ||
+        ( Img->Color_Type == GFX_COLOR_TYPE_BITMAP_WITH_PALETTE && !GFX_BITMAP_WITH_PALETTE_ENABLE ) ) return false ;
     if( Img->Color_Type != GFX_COLOR_TYPE_MIRROR &&
         ( Img->Color_Bits_Per_Pix < GFX_BPP_MIN || Img->Color_Bits_Per_Pix > GFX_BPP_MAX ) ) return false ;
+    if( Img->Color_Type != GFX_COLOR_TYPE_MIRROR )
+    {
+        static const uint8_t enabled[ 6 ] = { 0, GFX_COLOR_BPP_1_ENABLE, GFX_COLOR_BPP_2_ENABLE,
+                                               GFX_COLOR_BPP_3_ENABLE, GFX_COLOR_BPP_4_ENABLE,
+                                               GFX_COLOR_BPP_5_ENABLE } ;
+        if( !enabled[ Img->Color_Bits_Per_Pix ] ) return false ;
+    }
     if( Img->Color_Type == GFX_COLOR_TYPE_BITMAP && Img->Alpha_Enable ) return false ;
     if( Img->Alpha_Enable )
     {
+        static const uint8_t enabled[ 6 ] = { 0, GFX_ALPHA_BPP_1_ENABLE, GFX_ALPHA_BPP_2_ENABLE,
+                                               GFX_ALPHA_BPP_3_ENABLE, GFX_ALPHA_BPP_4_ENABLE,
+                                               GFX_ALPHA_BPP_5_ENABLE } ;
+        if( !GFX_ALPHA_ENABLE ) return false ;
         if( Img->Alpha_Bits_Per_Pix < GFX_BPP_MIN || Img->Alpha_Bits_Per_Pix > GFX_BPP_MAX ) return false ;
+        if( !enabled[ Img->Alpha_Bits_Per_Pix ] ) return false ;
         if( Img->Alpha_Save_Way != GFX_Save_Way_MCU && Img->Alpha_Save_Way != GFX_Save_Way_Flash ) return false ;
         if( Img->Alpha_Save_Way == GFX_Save_Way_MCU && Img->Alpha_Save_Info.C_Array == NULL ) return false ;
     }
@@ -1213,14 +1254,11 @@ static bool prv_Buff_Img_Is_Valid( const GFX_Buffer_t * Buff , const GFX_Img_t *
 
 static uint8_t prv_Buff_Read_Packed_Value( const uint8_t * Row , uint32_t Bit_Position , uint8_t BPP )
 {
-    uint8_t value = 0 ;
-    for( uint8_t bit_index = 0 ; bit_index < BPP ; bit_index++ )
-    {
-        uint32_t current_bit = Bit_Position + bit_index ;
-        uint8_t bit = ( Row[ current_bit / 8 ] >> ( current_bit % 8 ) ) & 0x01u ;
-        value |= (uint8_t)( bit << bit_index ) ;
-    }
-    return value ;
+    uint32_t byte = Bit_Position >> 3 ;
+    uint8_t shift = (uint8_t)( Bit_Position & 7u ) ;
+    uint16_t word = Row[ byte ] ;
+    if( shift + BPP > 8u ) word |= (uint16_t)Row[ byte + 1u ] << 8 ;
+    return (uint8_t)((word >> shift) & ((1u << BPP) - 1u)) ;
 }
 
 static void prv_Buff_Img_Core( const GFX_Buffer_t * Buff , const GFX_Img_t * Img ,
@@ -1287,6 +1325,12 @@ static void prv_Buff_Img_Core( const GFX_Buffer_t * Buff , const GFX_Img_t * Img
                 src_row = color_scratch ;
             }
 
+            if( !Img->Alpha_Enable )
+            {
+                memcpy( dst_row, src_row, color_read_bytes ) ;
+                continue ;
+            }
+
             const uint8_t * alpha_row = NULL ;
             if( Img->Alpha_Enable )
             {
@@ -1341,6 +1385,29 @@ static void prv_Buff_Img_Core( const GFX_Buffer_t * Buff , const GFX_Img_t * Img
         scratch_bytes += alpha_read_bytes_per_row ;
     if( scratch_bytes > 0 && ( The_GFX.Manager.Buffer == NULL || scratch_bytes > manager_bytes ) ) return ;
 
+    /* Fixed-color blending is common in UI work. Cache every palette/alpha
+     * result once when the caller-provided work area has room. */
+    GFX_Color_t * blend_lut = NULL ;
+#if GFX_FIXED_BACKGROUND_LUT_ENABLE
+    if( Img->Alpha_Enable && Blend_Back_Color_Enable && scratch_base != NULL )
+    {
+        uint32_t lut_offset = (uint32_t)(prv_GFX_Align_Color_Ptr( scratch_base + scratch_bytes ) - scratch_base) ;
+        uint32_t color_count = 1u << bpp ;
+        uint32_t alpha_count = 1u << alpha_bpp ;
+        uint32_t lut_bytes = color_count * alpha_count * sizeof(GFX_Color_t) ;
+        if( lut_offset + lut_bytes <= manager_bytes )
+        {
+            uint32_t color_index, alpha_index ;
+            blend_lut = (GFX_Color_t *)(scratch_base + lut_offset) ;
+            for( color_index = 0 ; color_index < color_count ; ++color_index )
+                for( alpha_index = 0 ; alpha_index < alpha_count ; ++alpha_index )
+                    blend_lut[ color_index * alpha_count + alpha_index ] =
+                        prv_GFX_Color_AlphaBlend_Fast( Back_Color, Palette[color_index],
+                                                       (uint8_t)alpha_index, alpha_max ) ;
+        }
+    }
+#endif
+
     for( uint16_t i = 0 ; i < com.H ; i++ )
     {
         uint16_t src_row = off_y + i ;
@@ -1374,20 +1441,32 @@ static void prv_Buff_Img_Core( const GFX_Buffer_t * Buff , const GFX_Img_t * Img
             }
         }
         uint16_t bit_pos = bit_offset ;
-        for( uint16_t p = 0 ; p < com.W ; p++ )
+        if( !Img->Alpha_Enable )
         {
-            uint8_t val = prv_Buff_Read_Packed_Value( row_src , bit_pos , bpp ) ;
-            GFX_Color_t source_color = ( ( Enable_Map >> val ) & 1u ) ? Palette[ val ] : Back_Color ;
-            if( Img->Alpha_Enable )
+            uint16_t p ;
+            for( p = 0 ; p < com.W ; ++p )
             {
-                uint8_t alpha = prv_Buff_Read_Packed_Value(
-                    alpha_row , alpha_bit_offset + (uint32_t)p * alpha_bpp , alpha_bpp ) ;
-                GFX_Color_t blend_bg = Blend_Back_Color_Enable ? Back_Color : dst_row[ p ] ;
-                dst_row[ p ] = GFX_Color_AlphaBlend( blend_bg , source_color , alpha , alpha_max ) ;
+                uint8_t val = prv_Buff_Read_Packed_Value( row_src, bit_pos, bpp ) ;
+                dst_row[p] = ((Enable_Map >> val) & 1u) ? Palette[val] : Back_Color ;
+                bit_pos += bpp ;
             }
-            else
-                dst_row[ p ] = source_color ;
-            bit_pos += bpp ;
+        }
+        else
+        {
+            uint16_t p ;
+            uint32_t alpha_count = 1u << alpha_bpp ;
+            uint32_t alpha_bit_pos = alpha_bit_offset ;
+            for( p = 0 ; p < com.W ; ++p )
+            {
+                uint8_t val = prv_Buff_Read_Packed_Value( row_src, bit_pos, bpp ) ;
+                uint8_t alpha = prv_Buff_Read_Packed_Value( alpha_row, alpha_bit_pos, alpha_bpp ) ;
+                bool enabled = ((Enable_Map >> val) & 1u) != 0u ;
+                GFX_Color_t source_color = enabled ? Palette[val] : Back_Color ;
+                if( blend_lut != NULL && enabled ) dst_row[p] = blend_lut[(uint32_t)val*alpha_count+alpha] ;
+                else dst_row[p] = prv_GFX_Color_AlphaBlend_Fast( Blend_Back_Color_Enable ? Back_Color : dst_row[p],
+                                                                 source_color, alpha, alpha_max ) ;
+                bit_pos += bpp ; alpha_bit_pos += alpha_bpp ;
+            }
         }
     }
 }
