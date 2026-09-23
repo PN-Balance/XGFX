@@ -104,7 +104,9 @@ void BY25Q80_Init( void )
     SPI_InitStruct.ClockPolarity = LL_SPI_POLARITY_LOW;
     SPI_InitStruct.ClockPhase = LL_SPI_PHASE_1EDGE;
     SPI_InitStruct.NSS = LL_SPI_NSS_SOFT;
-    SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV4 ;
+    /* 72 MHz PCLK only offers power-of-two divisors. DIV2 gives 36 MHz,
+     * the nearest available clock to the requested 32 MHz. */
+    SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV2 ;
     SPI_InitStruct.BitOrder = LL_SPI_MSB_FIRST;
     SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
     SPI_InitStruct.CRCPoly = 0x0U;
