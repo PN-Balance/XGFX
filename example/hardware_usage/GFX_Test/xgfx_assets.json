@@ -26,63 +26,191 @@
   },
   "assets": [
     {
-      "id": "landscape-mirror",
-      "name": "GFX_Test_Landscape_Mirror",
-      "source": "source_images/landscape_172x112.png"
+      "id": "mountain-mirror",
+      "name": "GFX_Test_Mountain_Mirror",
+      "source": "source_images/mountain_160x90.png"
     },
     {
-      "id": "landscape-palette",
-      "name": "GFX_Test_Landscape_Palette4",
-      "source": "source_images/landscape_172x112.png",
+      "id": "great-wall-p4",
+      "name": "GFX_Test_GreatWall_P4",
+      "source": "source_images/great_wall_160x90.png",
       "type": "BITMAP_WITH_PALETTE",
       "bpp": 4,
       "quantization": "MEDIAN_CUT"
     },
     {
-      "id": "gear-alpha",
-      "name": "GFX_Test_Gear_Alpha4",
-      "source": "source_images/gear_96.png",
+      "id": "santorini-p3",
+      "name": "GFX_Test_Santorini_P3",
+      "source": "source_images/santorini_160x90.png",
+      "type": "BITMAP_WITH_PALETTE",
+      "bpp": 3,
+      "quantization": "MAX_COVERAGE"
+    },
+    {
+      "id": "kitten-p5",
+      "name": "GFX_Test_Kitten_P5",
+      "source": "source_images/kitten_96.png",
+      "type": "BITMAP_WITH_PALETTE",
+      "bpp": 5,
+      "quantization": "DOMINANT"
+    },
+    {
+      "id": "dog-mirror",
+      "name": "GFX_Test_Dog_Mirror",
+      "source": "source_images/dog_96.png"
+    },
+    {
+      "id": "cat-mirror-a4",
+      "name": "GFX_Test_Cat_Mirror_A4",
+      "source": "source_images/cat_alpha_80x112.png",
       "alpha_bpp": 4
     },
     {
-      "id": "gear-palette",
-      "name": "GFX_Test_Gear_Palette2_Alpha2",
-      "source": "source_images/gear_96.png",
+      "id": "dog-p2-a2",
+      "name": "GFX_Test_Dog_P2_A2",
+      "source": "source_images/dog_alpha_80x112.png",
       "type": "BITMAP_WITH_PALETTE",
       "bpp": 2,
       "alpha_bpp": 2,
       "quantization": "MAX_COVERAGE"
     },
     {
-      "id": "mono-bitmap",
-      "name": "GFX_Test_Mono_Bitmap1",
-      "source": "source_images/mono_mask.png",
+      "id": "anime-p4-a5",
+      "name": "GFX_Test_Anime_P4_A5",
+      "source": "source_images/anime_alpha_80x136.png",
+      "type": "BITMAP_WITH_PALETTE",
+      "bpp": 4,
+      "alpha_bpp": 5,
+      "quantization": "DOMINANT"
+    },
+    {
+      "id": "ghibli-p4",
+      "name": "GFX_Test_Ghibli_P4",
+      "source": "source_images/ghibli_160x90.png",
+      "type": "BITMAP_WITH_PALETTE",
+      "bpp": 4,
+      "quantization": "MEDIAN_CUT"
+    },
+    {
+      "id": "bitmap-b1",
+      "name": "GFX_Test_Bitmap_B1",
+      "source": "source_images/friendly_mask_33x25.png",
       "type": "BITMAP",
       "bpp": 1
     },
     {
-      "id": "mcu-landscape",
-      "name": "GFX_Test_MCU_Landscape_Mirror",
-      "source": "source_images/landscape_64x40.png",
+      "id": "bitmap-b2",
+      "name": "GFX_Test_Bitmap_B2",
+      "source": "source_images/friendly_mask_33x25.png",
+      "type": "BITMAP",
+      "bpp": 2
+    },
+    {
+      "id": "bitmap-b3",
+      "name": "GFX_Test_Bitmap_B3",
+      "source": "source_images/friendly_mask_33x25.png",
+      "type": "BITMAP",
+      "bpp": 3
+    },
+    {
+      "id": "bitmap-b4",
+      "name": "GFX_Test_Bitmap_B4",
+      "source": "source_images/friendly_mask_33x25.png",
+      "type": "BITMAP",
+      "bpp": 4
+    },
+    {
+      "id": "bitmap-b5",
+      "name": "GFX_Test_Bitmap_B5",
+      "source": "source_images/friendly_mask_33x25.png",
+      "type": "BITMAP",
+      "bpp": 5
+    },
+    {
+      "id": "cat-p4-a1",
+      "name": "GFX_Test_Cat_P4_A1",
+      "source": "source_images/cat_alpha_80x112.png",
+      "type": "BITMAP_WITH_PALETTE",
+      "bpp": 4,
+      "alpha_bpp": 1,
+      "quantization": "DOMINANT"
+    },
+    {
+      "id": "cat-p4-a2",
+      "name": "GFX_Test_Cat_P4_A2",
+      "source": "source_images/cat_alpha_80x112.png",
+      "type": "BITMAP_WITH_PALETTE",
+      "bpp": 4,
+      "alpha_bpp": 2,
+      "quantization": "DOMINANT"
+    },
+    {
+      "id": "cat-p4-a3",
+      "name": "GFX_Test_Cat_P4_A3",
+      "source": "source_images/cat_alpha_80x112.png",
+      "type": "BITMAP_WITH_PALETTE",
+      "bpp": 4,
+      "alpha_bpp": 3,
+      "quantization": "DOMINANT"
+    },
+    {
+      "id": "cat-p4-a4",
+      "name": "GFX_Test_Cat_P4_A4",
+      "source": "source_images/cat_alpha_80x112.png",
+      "type": "BITMAP_WITH_PALETTE",
+      "bpp": 4,
+      "alpha_bpp": 4,
+      "quantization": "DOMINANT"
+    },
+    {
+      "id": "cat-p4-a5",
+      "name": "GFX_Test_Cat_P4_A5",
+      "source": "source_images/cat_alpha_80x112.png",
+      "type": "BITMAP_WITH_PALETTE",
+      "bpp": 4,
+      "alpha_bpp": 5,
+      "quantization": "DOMINANT"
+    },
+    {
+      "id": "mcu-mountain",
+      "name": "GFX_Test_MCU_Mountain",
+      "source": "source_images/mcu_mountain_48x27.png",
       "storage": "MCU"
     },
     {
-      "id": "mcu-gear-alpha",
-      "name": "GFX_Test_MCU_Gear_Palette2_Alpha2",
-      "source": "source_images/gear_40.png",
+      "id": "mcu-kitten-p3",
+      "name": "GFX_Test_MCU_Kitten_P3",
+      "source": "source_images/mcu_kitten_40.png",
+      "storage": "MCU",
+      "type": "BITMAP_WITH_PALETTE",
+      "bpp": 3,
+      "quantization": "MEDIAN_CUT"
+    },
+    {
+      "id": "mcu-cat-p2-a2",
+      "name": "GFX_Test_MCU_Cat_P2_A2",
+      "source": "source_images/mcu_cat_alpha_32x40.png",
       "storage": "MCU",
       "type": "BITMAP_WITH_PALETTE",
       "bpp": 2,
       "alpha_bpp": 2,
-      "quantization": "MAX_COVERAGE"
+      "quantization": "DOMINANT"
     },
     {
-      "id": "mcu-mono-bitmap",
-      "name": "GFX_Test_MCU_Mono_Bitmap1",
-      "source": "source_images/mono_mask_32.png",
+      "id": "mcu-bitmap-b1",
+      "name": "GFX_Test_MCU_Bitmap_B1",
+      "source": "source_images/friendly_mask_31x17.png",
       "storage": "MCU",
       "type": "BITMAP",
       "bpp": 1
+    },
+    {
+      "id": "mcu-bitmap-b5",
+      "name": "GFX_Test_MCU_Bitmap_B5",
+      "source": "source_images/friendly_mask_31x17.png",
+      "storage": "MCU",
+      "type": "BITMAP",
+      "bpp": 5
     }
   ]
 }
