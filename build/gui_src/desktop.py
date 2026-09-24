@@ -4,6 +4,8 @@ import base64
 import io
 import json
 import os
+import re
+import subprocess
 import sys
 import threading
 from pathlib import Path
@@ -174,6 +176,32 @@ class Api:
                 info[source] = None
         return info
 
+    def _source_path(self, source):
+        if self._root is None: raise ValueError('请先打开图片文件夹')
+        project = self._root.resolve()
+        path = (project / '.xgfx' / str(source)).resolve()
+        try: path.relative_to(project)
+        except ValueError as exc: raise ValueError('图片路径不在项目文件夹内') from exc
+        if not path.is_file(): raise ValueError('图片文件不存在')
+        return path
+
+    def rename_source(self, source, new_stem):
+        path = self._source_path(source)
+        stem = str(new_stem).strip()
+        if not stem or stem in {'.', '..'}: raise ValueError('文件名不能为空')
+        if re.search(r'[<>:"/\\|?*\x00-\x1f]', stem) or stem[-1:] in {' ', '.'}:
+            raise ValueError('文件名包含 Windows 不允许的字符')
+        target = path.with_name(stem + path.suffix)
+        if target.exists() and target != path: raise ValueError('同名文件已经存在')
+        path.rename(target)
+        return Path(os.path.relpath(target, self._root / '.xgfx')).as_posix()
+
+    def reveal_source(self, source):
+        path = self._source_path(source)
+        if os.name != 'nt': raise ValueError('当前系统不支持资源管理器定位')
+        subprocess.Popen(['explorer.exe', '/select,', str(path)])
+        return True
+
     def scan(self, data):
         return core.scan_project(self._root, data)
 
@@ -192,7 +220,7 @@ class Api:
             byte_order=data.get('defaults', {}).get('byte_order', 'little'), bpp=int(entry.get('bpp', 0)),
             alpha_bpp=int(entry.get('alpha_bpp', 0)), palette=tuple(entry.get('palette', [])),
             quantization=entry.get('quantization', 'DOMINANT'),
-            background_color=entry.get('background_color', '#000000'),
+            background_color=entry.get('background_color'),
             flash_address=core._integer(entry['flash_address']) if entry.get('flash_address') is not None else None)
         return c, core.AssetBuildService().convert(c, allow_auto_flash='flash' in data)
 

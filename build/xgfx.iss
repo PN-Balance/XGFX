@@ -3,7 +3,7 @@
 ; Output:      build\installer\XGFX-Setup.exe
 ; Requires:    Inno Setup 6 (https://jrsoftware.org/isdl.php)
 
-#define XGFXVersion "1.1.0"
+#define XGFXVersion "1.2.0"
 #define XGFXPublisher "XGFX Project"
 
 [Setup]

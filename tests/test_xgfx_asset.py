@@ -169,6 +169,19 @@ class BuildTests(unittest.TestCase):
             self.assertEqual(colors[0], 0x0000FF)
             self.assertEqual(colors[1], 0x80007F)
 
+    def test_transparency_without_selected_background_keeps_source_rgb(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "transparent.png"
+            image = Image.new("RGBA", (2, 1))
+            image.putdata([(12, 34, 56, 0), (78, 90, 123, 128)])
+            image.save(path)
+            config = xgfx_asset.AssetConfig(name="RawRgb", source=path, image_type="MIRROR",
+                                            color_format="RGB888", background_color=None)
+            result = AssetBuildService().convert(config)
+            self.assertTrue(result.succeeded, result.diagnostics)
+            colors = xgfx_asset.deserialize_colors(result.assets[0].color_data, "RGB888", "little")
+            self.assertEqual(colors, (0x0C2238, 0x4E5A7B))
+
     def test_flash_binary_uses_contiguous_alpha_address(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

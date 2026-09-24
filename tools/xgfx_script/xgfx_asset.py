@@ -6,7 +6,7 @@ xgfx_assets.json, edit that file, then run this script again to build assets.
 
 from __future__ import annotations
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 # ---- model ----
 
@@ -37,7 +37,7 @@ class AssetConfig:
     palette: tuple[str, ...] = ()
     auto_quantize: bool = False
     quantization: str = "DOMINANT"
-    background_color: str = "#000000"
+    background_color: str | None = None
     flash_address: int | None = None
 
 
@@ -388,7 +388,7 @@ def load_project(path: str | Path) -> tuple[dict[str, Any], list[AssetConfig]]:
             bpp=_integer(item.get("bpp", 0)), alpha_bpp=_integer(item.get("alpha_bpp", 0)),
             palette=tuple(item.get("palette", [])), auto_quantize=bool(item.get("auto_quantize", False)),
             quantization=str(item.get("quantization", "DOMINANT")).upper(),
-            background_color=str(item.get("background_color", "#000000")),
+            background_color=(str(item["background_color"]) if item.get("background_color") else None),
             flash_address=_integer(item["flash_address"]) if item.get("flash_address") is not None else None,
         ))
     return raw, assets
@@ -413,8 +413,9 @@ def validate_config(config: AssetConfig, allow_auto_flash: bool = False) -> list
     if config.palette and len(config.palette) > (1 << config.bpp): error("palette", "palette has more entries than BPP permits")
     if config.quantization not in {"DOMINANT", "MEDIAN_CUT", "MAX_COVERAGE", "FAST_OCTREE"}:
         error("quantization", "unsupported palette quantization algorithm")
-    try: parse_rgb(config.background_color)
-    except ValueError: error("background_color", "background color must be #RRGGBB")
+    if config.background_color:
+        try: parse_rgb(config.background_color)
+        except ValueError: error("background_color", "background color must be #RRGGBB")
     if config.storage == "FLASH" and config.flash_address is None and not allow_auto_flash:
         error("flash_address", "FLASH storage requires flash_address or project flash auto-layout")
     if not config.source.is_file(): error("source", f"source file does not exist: {config.source}")
@@ -486,7 +487,7 @@ def encode_asset(config: AssetConfig) -> EncodedAsset:
     rgba = list(image.get_flattened_data())
     rgb = [(r, g, b) for r, g, b, _ in rgba]
     alpha = [a for _, _, _, a in rgba]
-    if not config.alpha_bpp and any(a < 255 for a in alpha):
+    if not config.alpha_bpp and config.background_color and any(a < 255 for a in alpha):
         br, bg, bb = parse_rgb(config.background_color)
         rgb = [(round((r*a + br*(255-a))/255), round((g*a + bg*(255-a))/255),
                 round((b*a + bb*(255-a))/255)) for (r, g, b), a in zip(rgb, alpha)]
@@ -672,7 +673,7 @@ def initialize_project(directory: str | Path, manifest_name: str = "xgfx_assets.
             "type": "MIRROR", "storage": storage.upper(),
             "color_format": color_format.upper(), "byte_order": byte_order.lower(),
             "bpp": 0, "alpha_bpp": 0, "quantization": "DOMINANT",
-            "background_color": "#000000",
+            "background_color": None,
         },
         "flash": {"base_address": "0x0", "alignment": 1, "fill_byte": 255},
         "output": {
